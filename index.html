@@ -97,13 +97,31 @@
   .popup.show { display: flex; }
   .popup .move {
     color: #fff;
-    font-size: clamp(34px, 11vw, 56px);
-    line-height: 1.12;
-    font-weight: 800;
-    letter-spacing: -0.02em;
     width: 100%;
     max-width: 560px;
-    overflow-wrap: break-word;
+  }
+  .popup .move-label {
+    display: block;
+    font-size: clamp(18px, 5vw, 24px);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .popup .move-num {
+    display: block;
+    font-size: clamp(110px, 40vw, 200px);
+    line-height: 0.95;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin: 12px 0 4px;
+  }
+  .popup .move-unit {
+    display: block;
+    font-size: clamp(22px, 6vw, 30px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.85);
   }
   .popup button {
     background: #fff;
@@ -138,7 +156,11 @@
 </div>
 
 <div class="popup" id="result-box" role="dialog" aria-modal="true" aria-labelledby="result-text">
-  <div class="move" id="result-text">Move the piece by 0 units</div>
+  <div class="move">
+    <span class="move-label">Move the piece by</span>
+    <span class="move-num" id="result-text">0</span>
+    <span class="move-unit" id="result-unit">units</span>
+  </div>
   <button id="popup-reset">Reset</button>
 </div>
 
@@ -149,6 +171,7 @@ const arrestsEl = document.getElementById('arrests');
 const errEl = document.getElementById('input-error');
 const resultBox = document.getElementById('result-box');
 const resultText = document.getElementById('result-text');
+const resultUnit = document.getElementById('result-unit');
 
 function advance(from, to) {
   from.addEventListener('keydown', function (e) {
@@ -176,7 +199,13 @@ document.getElementById('calc-btn').addEventListener('click', function () {
   errEl.style.display = 'none';
 
   const move = Math.round(size * (growthPct / 100) - arrests);
-  resultText.textContent = 'Move the piece by ' + move.toLocaleString() + ' units';
+  const moveText = move.toLocaleString();
+  resultText.textContent = moveText;
+  // step the number down so long values can't run off a phone screen
+  resultText.style.fontSize =
+    moveText.length > 6 ? 'clamp(56px, 19vw, 104px)' :
+    moveText.length > 4 ? 'clamp(78px, 27vw, 148px)' : '';
+  resultUnit.textContent = Math.abs(move) === 1 ? 'unit' : 'units';
   resultBox.classList.add('show');
   document.activeElement && document.activeElement.blur();
 });
