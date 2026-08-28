@@ -31,28 +31,20 @@
   }
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
-  .field-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .field-row .field {
-    flex: 1;
-    margin-bottom: 0;
-  }
   label {
     display: block;
-    font-size: 13px;
+    font-size: 15px;
     color: #a89d8c;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   input {
     width: 100%;
     background: #14100d;
     border: 1px solid #3a3025;
-    border-radius: 10px;
-    padding: 14px 12px;
-    font-size: 18px;
+    border-radius: 12px;
+    padding: 20px 16px;
+    font-size: 22px;
+    font-family: inherit;
     color: #f2ede4;
     outline: none;
     -webkit-appearance: none;
@@ -63,187 +55,144 @@
     background: #c8934a;
     color: #14100d;
     border: none;
-    border-radius: 14px;
-    padding: 22px;
-    font-size: 20px;
+    border-radius: 18px;
+    padding: 32px 24px;
+    min-height: 88px;
+    font-family: inherit;
+    font-size: 26px;
     font-weight: 700;
-    margin-top: 8px;
+    margin-top: 16px;
+    -webkit-appearance: none;
+    touch-action: manipulation;
   }
   button:active { opacity: 0.85; }
-  .size-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 18px;
+  button.secondary {
+    background: none;
+    color: #a89d8c;
+    border: 1px solid #3a3025;
+    min-height: 68px;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: 600;
   }
-  .size-row .label { font-size: 13px; color: #a89d8c; }
-  .size-row .value { font-size: 26px; font-weight: 600; }
   .error {
     font-size: 13px;
     color: #e0836a;
     margin-top: 8px;
     display: none;
   }
-  .result {
+  .popup {
     display: none;
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 50;
+    background: #b3261e;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 22px 0;
+    padding: calc(32px + env(safe-area-inset-top)) 24px
+             calc(32px + env(safe-area-inset-bottom));
   }
-  .result .move {
-    font-size: 30px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+  .popup.show { display: flex; }
+  .popup .move {
+    color: #fff;
+    font-size: clamp(34px, 11vw, 56px);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    width: 100%;
+    max-width: 560px;
+    overflow-wrap: break-word;
   }
-  .result .caption {
-    font-size: 13px;
-    color: #a89d8c;
-    margin-top: 4px;
+  .popup button {
+    background: #fff;
+    color: #b3261e;
+    width: 100%;
+    max-width: 420px;
+    margin-top: 56px;
   }
-  .history { margin-top: 4px; }
-  .history-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #6f6455;
-    margin-bottom: 10px;
-  }
-  .history-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: #cfc4b4;
-    padding: 8px 0;
-    border-top: 1px solid #2a2219;
-  }
-  .history-row:first-child { border-top: none; }
-  .history-row .move-out { color: #f2ede4; font-weight: 600; }
-  #round-view { display: none; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div id="setup-view" class="card">
+  <div class="card">
     <div class="field">
-      <label for="start-size">Starting cartel size</label>
-      <input type="number" id="start-size" inputmode="numeric" enterkeyhint="go" placeholder="100" />
+      <label for="size">Cartel size</label>
+      <input type="number" id="size" inputmode="numeric" enterkeyhint="next" placeholder="e.g. 100" />
     </div>
-    <button id="start-btn">Start tracking</button>
-  </div>
-
-  <div id="round-view">
-    <div class="card">
-      <div class="size-row">
-        <span class="label">Round <span id="round-num">1</span> &middot; cartel size</span>
-        <span class="value" id="current-size">100</span>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="growth">Cartel growth (%)</label>
-          <input type="number" id="growth" inputmode="decimal" enterkeyhint="next" placeholder="e.g. 10" />
-        </div>
-        <div class="field">
-          <label for="arrests">Arrests</label>
-          <input type="number" id="arrests" inputmode="numeric" enterkeyhint="go" placeholder="e.g. 8" />
-        </div>
-      </div>
-      <p class="error" id="input-error">Enter both growth rate and arrests.</p>
-      <button id="calc-btn">Calculate move</button>
-
-      <div class="result" id="result-box">
-        <div class="move" id="result-text">Move the piece by 0 units</div>
-        <div class="caption">new cartel size: <span id="result-size">0</span></div>
-      </div>
+    <div class="field">
+      <label for="growth">Growth rate (%)</label>
+      <input type="number" id="growth" inputmode="decimal" enterkeyhint="next" placeholder="e.g. 10" />
+    </div>
+    <div class="field">
+      <label for="arrests">Arrests</label>
+      <input type="number" id="arrests" inputmode="numeric" enterkeyhint="go" placeholder="e.g. 8" />
     </div>
 
-    <div class="card history" id="history-card" style="display:none;">
-      <div class="history-title">History</div>
-      <div id="history"></div>
-    </div>
+    <p class="error" id="input-error">Enter cartel size, growth rate and arrests.</p>
+    <button id="calc-btn">Calculate move</button>
+    <button id="reset-btn" class="secondary">Reset</button>
+
   </div>
 </div>
 
+<div class="popup" id="result-box" role="dialog" aria-modal="true" aria-labelledby="result-text">
+  <div class="move" id="result-text">Move the piece by 0 units</div>
+  <button id="popup-reset">Reset</button>
+</div>
+
 <script>
-let cartelSize = null;
-let round = 1;
-let history = [];
+const sizeEl = document.getElementById('size');
+const growthEl = document.getElementById('growth');
+const arrestsEl = document.getElementById('arrests');
+const errEl = document.getElementById('input-error');
+const resultBox = document.getElementById('result-box');
+const resultText = document.getElementById('result-text');
 
-document.getElementById('start-size').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
+function advance(from, to) {
+  from.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
     e.preventDefault();
-    this.blur();
-    document.getElementById('start-btn').click();
-  }
-});
-
-document.getElementById('growth').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    document.getElementById('arrests').focus();
-  }
-});
-
-document.getElementById('arrests').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
+    if (to) { to.focus(); return; }
     this.blur();
     document.getElementById('calc-btn').click();
-  }
-});
-
-document.getElementById('start-btn').addEventListener('click', function () {
-  const val = parseFloat(document.getElementById('start-size').value);
-  const input = document.getElementById('start-size');
-  if (isNaN(val)) {
-    input.style.borderColor = '#e0836a';
-    return;
-  }
-  input.style.borderColor = '#3a3025';
-  cartelSize = val;
-  document.getElementById('setup-view').style.display = 'none';
-  document.getElementById('round-view').style.display = 'block';
-  document.getElementById('current-size').textContent = Math.round(cartelSize).toLocaleString();
-});
+  });
+}
+advance(sizeEl, growthEl);
+advance(growthEl, arrestsEl);
+advance(arrestsEl, null);
 
 document.getElementById('calc-btn').addEventListener('click', function () {
-  const growthEl = document.getElementById('growth');
-  const arrestsEl = document.getElementById('arrests');
-  const errEl = document.getElementById('input-error');
+  const size = parseFloat(sizeEl.value);
   const growthPct = parseFloat(growthEl.value);
   const arrests = parseFloat(arrestsEl.value);
 
-  if (isNaN(growthPct) || isNaN(arrests)) {
+  if (isNaN(size) || isNaN(growthPct) || isNaN(arrests)) {
     errEl.style.display = 'block';
+    resultBox.classList.remove('show');
     return;
   }
   errEl.style.display = 'none';
 
-  const growth = growthPct / 100;
-  const raw = cartelSize * growth - arrests;
-  const move = Math.round(raw);
-  const newSize = raw;
+  const move = Math.round(size * (growthPct / 100) - arrests);
+  resultText.textContent = 'Move the piece by ' + move.toLocaleString() + ' units';
+  resultBox.classList.add('show');
+  document.activeElement && document.activeElement.blur();
+});
 
-  document.getElementById('result-text').textContent = 'Move the piece by ' + move.toLocaleString() + ' units';
-  document.getElementById('result-size').textContent = Math.round(newSize).toLocaleString();
-  document.getElementById('result-box').style.display = 'block';
-
-  history.unshift({ round: round, growthPct: growthPct, arrests: arrests, move: move, size: Math.round(newSize) });
-  const histCard = document.getElementById('history-card');
-  histCard.style.display = 'block';
-  const histEl = document.getElementById('history');
-  histEl.innerHTML = history.map(function (h) {
-    return '<div class="history-row">' +
-      '<span>Round ' + h.round + ' &middot; ' + h.growthPct + '% &minus; ' + h.arrests + '</span>' +
-      '<span class="move-out">' + h.move + ' &rarr; ' + h.size.toLocaleString() + '</span></div>';
-  }).join('');
-
-  cartelSize = newSize;
-  round += 1;
-  document.getElementById('round-num').textContent = round;
-  document.getElementById('current-size').textContent = Math.round(cartelSize).toLocaleString();
+function reset() {
+  sizeEl.value = '';
   growthEl.value = '';
   arrestsEl.value = '';
-});
+  errEl.style.display = 'none';
+  resultBox.classList.remove('show');
+  sizeEl.focus();
+}
+
+document.getElementById('popup-reset').addEventListener('click', reset);
+
+document.getElementById('reset-btn').addEventListener('click', reset);
 </script>
 </body>
 </html>
